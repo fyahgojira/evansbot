@@ -1,7 +1,6 @@
 # evansbot.py
 import discord  # type: ignore
 import openai
-from openai import OpenAIError, RateLimitError
 import os
 from dotenv import load_dotenv
 
@@ -16,12 +15,10 @@ modelAI = 'gemma3:1b' # what AI model to use
 # -------------------------------
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-OPENAI_KEY = os.getenv("OPENAI_KEY")
-openai.api_key = OPENAI_KEY
 
 # Quick check
-if not DISCORD_TOKEN or not OPENAI_KEY:
-    raise ValueError("DISCORD_TOKEN or OPENAI_KEY not found in .env!")
+if not DISCORD_TOKEN:
+    raise ValueError("DISCORD_TOKEN not found in .env!")
 
 # -------------------------------
 # Discord intents
