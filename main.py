@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 from ollama import chat
 from ollama import ChatResponse
 
+modelAI = 'gemma3:1b' # what AI model to use
+
 # -------------------------------
 # Load secrets from .env
 # -------------------------------
@@ -83,7 +85,6 @@ class Client(discord.Client):
         if message.content == "looks like the bot has a mind of its own":
             await message.channel.send("no it doesnt")
 
-
         # -------------------------------
         # @grok is this true? command
         # -------------------------------
@@ -92,7 +93,7 @@ class Client(discord.Client):
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
                 prompt = 'is this true? respond shortly and try to impersonate X grok but dont be cheesy; the message is: ' + original_msg.content
 
-                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                response: ChatResponse = chat(model=modelAI, messages=[
                     {
                         'role': 'user',
                         'content': prompt
@@ -102,7 +103,20 @@ class Client(discord.Client):
             else:
                 await message.channel.send("Fuck You")
                 #Above line handles a truth verdict without a reply
-        
+       
+        # -------------------------------
+        # ask grok command
+        # -------------------------------
+        elif message.content.startswith("@grok"):
+            prompt = f"Answer directly with no fluff, add sources if needed: {message.content.replace("@grok", "")}"
+            response: ChatResponse = chat(model=modelAI, messages=[
+                {
+                    'role': 'user',
+                    'content': prompt
+                },
+            ])
+            await message.channel.send(response.message.content)
+ 
         # -------------------------------
         # Summarizer command
         # -------------------------------
@@ -121,7 +135,7 @@ class Client(discord.Client):
                 return
 
             prompt = f"Summarize this Discord conversation clearly and concisely:\n{chat_history}"
-            response: ChatResponse = chat(model='gemma3:1b', messages=[
+            response: ChatResponse = chat(model=modelAI, messages=[
                 {
                     'role': 'user',
                     'content': prompt
@@ -148,7 +162,7 @@ class Client(discord.Client):
 
             try:
                 prompt = f"Act as google translate. Give me just the resulting sentence and do not talk to me. Translate the following text into {target_lang}:\n {text_to_translate}"
-                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                response: ChatResponse = chat(model=modelAI, messages=[
                     {"role": "user", "content": prompt}
                 ])
                 translation = response.message.content
