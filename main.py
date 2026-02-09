@@ -46,7 +46,7 @@ class Client(discord.Client):
         # Simple commands
         # -------------------------------
         
-        #Listed in help command
+        # Listed in help command
         if message.content == "e!ping":
             await message.channel.send("Pong!")
 
@@ -66,7 +66,7 @@ class Client(discord.Client):
             )
             await message.channel.send(help_text)
 
-        #Not listed in help command
+        # Not listed in help command
         
         if message.content.lower().startswith("i disagree"):
             await message.channel.send("Translating 🔁 ... Glory to the state of Israel! 🇮🇱✡️")
@@ -147,7 +147,7 @@ class Client(discord.Client):
             text_to_translate = parts[2]
 
             try:
-                prompt = f"Translate the following text into {target_lang} clearly:\n{text_to_translate}"
+                prompt = f"Act as google translate. Give me just the resulting sentence and do not talk to me. Translate the following text into {target_lang}:\n {text_to_translate}"
                 response: ChatResponse = chat(model='gemma3:1b', messages=[
                     {"role": "user", "content": prompt}
                 ])
@@ -160,26 +160,6 @@ class Client(discord.Client):
                     "Error: Translation failed! Make sure you used a valid language code.\n"
                     "Use `e!languages` to see the supported codes."
                 )
-
-        # -------------------------------
-        # List supported languages
-        # -------------------------------
-        if message.content == "e!languages":
-            # Define a simple dictionary of common languages
-            languages = {
-                "en": "English",
-                "fr": "French",
-                "es": "Spanish",
-                "de": "German",
-                "it": "Italian",
-                "ja": "Japanese",
-                "ko": "Korean",
-                "zh": "Chinese",
-                "ru": "Russian",
-                "pt": "Portuguese",
-                "ar": "Arabic",
-                "hi": "Hindi"
-            }
 
             # Build a nice formatted list
             language_list = "\n".join([f"`{code}` - {name}" for code, name in languages.items()])
