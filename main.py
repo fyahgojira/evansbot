@@ -45,18 +45,14 @@ class Client(discord.Client):
         # -------------------------------
         # Simple commands
         # -------------------------------
+        
+        #Listed in help command
         if message.content == "e!ping":
             await message.channel.send("Pong!")
 
         if message.content == "e!hello world":
             await message.channel.send("print")
             await message.channel.send("https://media.discordapp.net/attachments/1378827972898848768/1405894069053292734/togif.gif?ex=698a7ea2&is=69892d22&hm=f4e4d036d7fe339eef2958b0103f56f6171a2eb2c33869f334d00a36ca3bacdb&=")
-
-        if message.content == "arash":
-            await message.channel.send("fuck you arash")
-
-        if message.content == "looks like the bot has a mind of its own":
-            await message.channel.send("no it doesnt")
 
         if message.content == "e!help":
             help_text = (
@@ -65,11 +61,28 @@ class Client(discord.Client):
                 "`e!hello world` - Get a fun response.\n"
                 "`e!summarize` - Summarize the last 50 messages in the channel."
                 "@grok is this true? - ask grok if this is true"
+                "`e!translate [language_code] [text]` - Translate text into a specific language."
+                "`e!languages` - Show supported language codes."
             )
             await message.channel.send(help_text)
 
+        #Not listed in help command
+        
         if message.content.lower().startswith("i disagree"):
             await message.channel.send("Translating 🔁 ... Glory to the state of Israel! 🇮🇱✡️")
+
+        if "epstein" in message.content.lower():  # case-insensitive check
+            await message.channel.send("Swear i wasnt on the list bro")
+
+        if "quebec" in message.content.lower():  # case-insensitive check
+            await message.channel.send("tabarnak de calisse de ostie de sacrament de crisse de câlisse")
+
+        if message.content == "arash":
+            await message.channel.send("fuck you arash")
+
+        if message.content == "looks like the bot has a mind of its own":
+            await message.channel.send("no it doesnt")
+
 
         # -------------------------------
         # @grok is this true? command
