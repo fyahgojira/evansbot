@@ -117,6 +117,37 @@ class Client(discord.Client):
             summary = response.message.content
             await message.channel.send(f"**Summary:** {summary}")
 
+        # -------------------------------
+        # Translation command
+        # -------------------------------
+        if message.content.startswith("e!translate"):
+            # Expected format: e!translate [language_code] [text to translate]
+            parts = message.content.split(" ", 2)
+            if len(parts) < 3:
+                await message.channel.send(
+                    "Usage: `e!translate [language_code] [text]`\n"
+                    "Use `e!languages` to see the list of supported language codes."
+                )
+                return
+
+            target_lang = parts[1]  # e.g., 'fr', 'es', 'de'
+            text_to_translate = parts[2]
+
+            try:
+                prompt = f"Translate the following text into {target_lang} clearly:\n{text_to_translate}"
+                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                    {"role": "user", "content": prompt}
+                ])
+                translation = response.message.content
+                await message.channel.send(f"**Translation ({target_lang}):** {translation}")
+
+            except Exception as e:
+                print("Translation error:", e)
+                await message.channel.send(
+                    "Error: Translation failed! Make sure you used a valid language code.\n"
+                    "Use `e!languages` to see the supported codes."
+                )
+
 
 # -------------------------------
 # Run the bot
