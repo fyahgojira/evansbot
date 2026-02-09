@@ -5,6 +5,10 @@ from openai import OpenAIError, RateLimitError
 import os
 from dotenv import load_dotenv
 
+# Ollama libraries
+from ollama import chat
+from ollama import ChatResponse
+
 # -------------------------------
 # Load secrets from .env
 # -------------------------------
@@ -41,11 +45,12 @@ class Client(discord.Client):
         # -------------------------------
         # Simple commands
         # -------------------------------
-        if message.content == "!ping":
+        if message.content == "e!ping":
             await message.channel.send("Pong!")
 
-        if message.content == "!hello world":
+        if message.content == "e!hello world":
             await message.channel.send("print")
+            await message.channel.send("https://media.discordapp.net/attachments/1378827972898848768/1405894069053292734/togif.gif?ex=698a7ea2&is=69892d22&hm=f4e4d036d7fe339eef2958b0103f56f6171a2eb2c33869f334d00a36ca3bacdb&=")
 
         if message.content == "arash":
             await message.channel.send("fuck you arash")
@@ -53,19 +58,36 @@ class Client(discord.Client):
         if message.content == "looks like the bot has a mind of its own":
             await message.channel.send("no it doesnt")
 
-        if message.content == "!help":
+        if message.content == "e!help":
             help_text = (
                 "**EvansBot Commands:**\n"
-                "`!ping` - Check if the bot is responsive.\n"
-                "`!hello world` - Get a fun response.\n"
-                "`!summarize` - Summarize the last 50 messages in the channel."
+                "`e!ping` - Check if the bot is responsive.\n"
+                "`e!hello world` - Get a fun response.\n"
+                "`e!summarize` - Summarize the last 50 messages in the channel."
+                "@grok is this true? - ask grok if this is true"
             )
             await message.channel.send(help_text)
+
+        # @grok is this true?
+        if message.content == "@grok is this true?":
+            if message.reference is not None:
+                original_msg = await message.channel.fetch_message(message.reference.message_id)
+                prompt = 'is this true? respond shortly and try to impersonate X grok but dont be cheesy; the message is: ' + original_msg.content
+
+                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                    {
+                        'role': 'user',
+                        'content': prompt
+                    },
+                ])
+                await message.channel.send(response.message.content)
+            else:
+                await message.channel.send("Fuck You")
 
         # -------------------------------
         # Summarizer command
         # -------------------------------
-        if message.content == "!summarize":
+        if message.content == "e!summarize":
             # Collect last 50 messages ignoring bots
             messages = []
             async for msg in message.channel.history(limit=50):
@@ -79,23 +101,19 @@ class Client(discord.Client):
                 await message.channel.send("No messages to summarize!")
                 return
 
-            # Call OpenAI safely
-            try:
-                response = openai.chat.completions.create(
-                    model="gpt-3.5-turbo",
-                    messages=[
-                        {"role": "user", "content": f"Summarize this Discord conversation clearly and concisely:\n{chat_history}"}
-                    ]
-                )
+            prompt = f"Summarize this Discord conversation clearly and concisely:\n{chat_history}"
+            response: ChatResponse = chat(model='gemma3:1b', messages=[
+                {
+                    'role': 'user',
+                    'content': prompt
+                },
+            ])
+            summary = response.message.content
+            await message.channel.send(f"**Summary:** {summary}")
 
-                summary = response.choices[0].message.content
-                await message.channel.send(f"**Summary:** {summary}")
+        if message.content.startswith("I disagree"):
+            await message.channel.send("Translating 🔁 ... Glory to the state of Israel! 🇮🇱✡️")
 
-            except RateLimitError:
-                await message.channel.send("Sorry, I can't summarize right now — quota exceeded!")
-
-            except OpenAIError as e:
-                await message.channel.send(f"An error occurred while summarizing: {e}")
 
 # -------------------------------
 # Run the bot
