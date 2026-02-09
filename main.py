@@ -117,6 +117,60 @@ class Client(discord.Client):
             summary = response.message.content
             await message.channel.send(f"**Summary:** {summary}")
 
+        # -------------------------------
+        # Translation command
+        # -------------------------------
+        if message.content.startswith("e!translate"):
+            # Expected format: e!translate [language_code] [text to translate]
+            parts = message.content.split(" ", 2)
+            if len(parts) < 3:
+                await message.channel.send(
+                    "Usage: `e!translate [language_code] [text]`\n"
+                    "Use `e!languages` to see the list of supported language codes."
+                )
+                return
+
+            target_lang = parts[1]  # e.g., 'fr', 'es', 'de'
+            text_to_translate = parts[2]
+
+            try:
+                prompt = f"Translate the following text into {target_lang} clearly:\n{text_to_translate}"
+                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                    {"role": "user", "content": prompt}
+                ])
+                translation = response.message.content
+                await message.channel.send(f"**Translation ({target_lang}):** {translation}")
+
+            except Exception as e:
+                print("Translation error:", e)
+                await message.channel.send(
+                    "Error: Translation failed! Make sure you used a valid language code.\n"
+                    "Use `e!languages` to see the supported codes."
+                )
+
+        # -------------------------------
+        # List supported languages
+        # -------------------------------
+        if message.content == "e!languages":
+            # Define a simple dictionary of common languages
+            languages = {
+                "en": "English",
+                "fr": "French",
+                "es": "Spanish",
+                "de": "German",
+                "it": "Italian",
+                "ja": "Japanese",
+                "ko": "Korean",
+                "zh": "Chinese",
+                "ru": "Russian",
+                "pt": "Portuguese",
+                "ar": "Arabic",
+                "hi": "Hindi"
+            }
+
+            # Build a nice formatted list
+            language_list = "\n".join([f"`{code}` - {name}" for code, name in languages.items()])
+            await message.channel.send(f"**Supported languages for translation:**\n{language_list}")
 
 # -------------------------------
 # Run the bot
