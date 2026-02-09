@@ -172,10 +172,6 @@ class Client(discord.Client):
                     "Use `e!languages` to see the supported codes."
                 )
 
-            # Build a nice formatted list
-            language_list = "\n".join([f"`{code}` - {name}" for code, name in languages.items()])
-            await message.channel.send(f"**Supported languages for translation:**\n{language_list}")
-
 # -------------------------------
 # Run the bot
 # -------------------------------
