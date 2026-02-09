@@ -68,13 +68,13 @@ class Client(discord.Client):
             )
             await message.channel.send(help_text)
 
-        if message.content.startswith("I disagree"):
+        if message.content.lower().startswith("i disagree"):
             await message.channel.send("Translating 🔁 ... Glory to the state of Israel! 🇮🇱✡️")
 
         # -------------------------------
         # @grok is this true? command
         # -------------------------------
-        if message.content == "@grok is this true?":
+        if message.content.startswith("@grok is this true"):
             if message.reference is not None:
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
                 prompt = 'is this true? respond shortly and try to impersonate X grok but dont be cheesy; the message is: ' + original_msg.content
