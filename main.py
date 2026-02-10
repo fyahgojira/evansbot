@@ -1,7 +1,6 @@
 # evansbot.py
 import discord  # type: ignore
 import openai
-from openai import OpenAIError, RateLimitError
 import os
 from dotenv import load_dotenv
 
@@ -9,17 +8,17 @@ from dotenv import load_dotenv
 from ollama import chat
 from ollama import ChatResponse
 
+modelAI = 'gemma3:1b' # what AI model to use
+
 # -------------------------------
 # Load secrets from .env
 # -------------------------------
 load_dotenv()
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
-OPENAI_KEY = os.getenv("OPENAI_KEY")
-openai.api_key = OPENAI_KEY
 
 # Quick check
-if not DISCORD_TOKEN or not OPENAI_KEY:
-    raise ValueError("DISCORD_TOKEN or OPENAI_KEY not found in .env!")
+if not DISCORD_TOKEN:
+    raise ValueError("DISCORD_TOKEN not found in .env!")
 
 # -------------------------------
 # Discord intents
@@ -46,7 +45,7 @@ class Client(discord.Client):
         # Simple commands
         # -------------------------------
         
-        #Listed in help command
+        # Listed in help command
         if message.content == "e!ping":
             await message.channel.send("Pong!")
 
@@ -66,7 +65,7 @@ class Client(discord.Client):
             )
             await message.channel.send(help_text)
 
-        #Not listed in help command
+        # Not listed in help command
         
         if message.content.lower().startswith("i disagree"):
             await message.channel.send("Translating 🔁 ... Glory to the state of Israel! 🇮🇱✡️")
@@ -83,7 +82,6 @@ class Client(discord.Client):
         if message.content == "looks like the bot has a mind of its own":
             await message.channel.send("no it doesnt")
 
-
         # -------------------------------
         # @grok is this true? command
         # -------------------------------
@@ -92,7 +90,7 @@ class Client(discord.Client):
                 original_msg = await message.channel.fetch_message(message.reference.message_id)
                 prompt = 'is this true? respond shortly and try to impersonate X grok but dont be cheesy; the message is: ' + original_msg.content
 
-                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                response: ChatResponse = chat(model=modelAI, messages=[
                     {
                         'role': 'user',
                         'content': prompt
@@ -102,7 +100,20 @@ class Client(discord.Client):
             else:
                 await message.channel.send("Fuck You")
                 #Above line handles a truth verdict without a reply
-        
+       
+        # -------------------------------
+        # ask grok command
+        # -------------------------------
+        elif message.content.startswith("@grok"):
+            prompt = f"Answer directly with no fluff, add sources if needed: {message.content.replace("@grok", "")}"
+            response: ChatResponse = chat(model=modelAI, messages=[
+                {
+                    'role': 'user',
+                    'content': prompt
+                },
+            ])
+            await message.channel.send(response.message.content)
+ 
         # -------------------------------
         # Summarizer command
         # -------------------------------
@@ -121,7 +132,7 @@ class Client(discord.Client):
                 return
 
             prompt = f"Summarize this Discord conversation clearly and concisely:\n{chat_history}"
-            response: ChatResponse = chat(model='gemma3:1b', messages=[
+            response: ChatResponse = chat(model=modelAI, messages=[
                 {
                     'role': 'user',
                     'content': prompt
@@ -147,8 +158,8 @@ class Client(discord.Client):
             text_to_translate = parts[2]
 
             try:
-                prompt = f"Translate the following text into {target_lang} clearly:\n{text_to_translate}"
-                response: ChatResponse = chat(model='gemma3:1b', messages=[
+                prompt = f"Act as google translate. Give me just the resulting sentence and do not talk to me. Translate the following text into {target_lang}:\n {text_to_translate}"
+                response: ChatResponse = chat(model=modelAI, messages=[
                     {"role": "user", "content": prompt}
                 ])
                 translation = response.message.content
@@ -160,30 +171,6 @@ class Client(discord.Client):
                     "Error: Translation failed! Make sure you used a valid language code.\n"
                     "Use `e!languages` to see the supported codes."
                 )
-
-        # -------------------------------
-        # List supported languages
-        # -------------------------------
-        if message.content == "e!languages":
-            # Define a simple dictionary of common languages
-            languages = {
-                "en": "English",
-                "fr": "French",
-                "es": "Spanish",
-                "de": "German",
-                "it": "Italian",
-                "ja": "Japanese",
-                "ko": "Korean",
-                "zh": "Chinese",
-                "ru": "Russian",
-                "pt": "Portuguese",
-                "ar": "Arabic",
-                "hi": "Hindi"
-            }
-
-            # Build a nice formatted list
-            language_list = "\n".join([f"`{code}` - {name}" for code, name in languages.items()])
-            await message.channel.send(f"**Supported languages for translation:**\n{language_list}")
 
 # -------------------------------
 # Run the bot
